@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Enumeration Practice</title>
+    <script src="https://unpkg.com/jspsych@7.3.4"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-canvas-keyboard-response@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.2.0"></script>
+    <link href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <style>
+      body {
+        margin: 0;
+        background-color: #808080;
+      }
+      .jspsych-content {
+        background: #808080;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      .jspsych-btn {
+        display: none !important;
+      }
+      .jspsych-survey-text-question {
+        margin: 0;
+      }
+      .response-screen {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      .response-screen input {
+        margin-top: 20px;
+        font-size: 28px;
+        width: 200px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body></body>
+  <script>
+
+    // initialise jspsych
+    const jsPsych = initJsPsych();
+      var timeline = [];
+
+    // preload images for the mask
+    const preload = {
+      type: jsPsychPreload,
+      images: ['mask_2.png']
+    };
+
+    // instructions for the experiment
+    const welcome_instructions = {
+      type: jsPsychHtmlKeyboardResponse,
+        stimulus: `
+            <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.6; font-family: sans-serif; text-align: left;">
+      
+              <h2 style="text-align: center; margin-bottom: 30px; font-size: 26px; color: #111111;">Welcome to the Practice Round</h2>
+      
+              <p style="margin-bottom: 25px;">
+                In this task, a <strong>collection of squares</strong> will flash very quickly on the screen. 
+                Because they flash so fast, you will not be able to count them individually. Instead, you must estimate how many squares you saw.
+              </p>
+      
+              <h3 style="font-size: 20px; margin-bottom: 15px; color: #111111;">Step-by-Step Instructions:</h3>
+      
+              <ul style="padding-left: 20px; margin-bottom: 30px;">
+                <li style="margin-bottom: 12px;">
+                  <strong>Focus:</strong> Each trial begins with a fixation cross <strong>(+)</strong>. Please keep your eyes fixed on this cross.
+                </li>
+                <li style="margin-bottom: 12px;">
+                  <strong>Observe:</strong> A group of small squares will flash on the screen for a fraction of a second.
+                </li>
+                <li style="margin-bottom: 12px;">
+                  <strong>Respond:</strong> When the <strong>?</strong> appears, type the number of squares you saw using the <strong>number keys</strong> on your keyboard.
+                </li>
+              </ul>
+      
+              <p style="margin-bottom: 25px; background-color: #f9f9f9; padding: 15px; border-left: 4px solid #333;">
+                <strong>Important:</strong> Try to respond as <strong>quickly and accurately</strong> as possible. 
+                You have a limited time to answer. If you do not respond within 2.4 seconds, the trial will automatically time out and advance.
+              </p>
+      
+              <p style="margin-bottom: 40px; text-align: center;">
+                You will complete <strong>6 practice trials</strong> to familiarise yourself with the task before the main experiment begins.
+              </p>
+      
+              <p style="text-align: center; font-size: 22px; color: #000000;">
+                <strong>Press the spacebar to begin.</strong>
+              </p>
+      
+            </div>
+          `,
+          choices: [' '] 
+    };
+
+    timeline.push(preload, welcome_instructions);
+
+// Squares trial empty array to pool all possible 8 rounds
+    var all_rounds = [];
+
+    // Loop to build the 8 independent round objects
+    for (let currentCount = 1; currentCount <= 8; currentCount++) {
+
+      // fixation cross trial
+      var fixation_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<div style="font-size: 72px; color: #000000; display: flex; align-items: center; justify-content: center; height: 100vh;">+</div>',
+        choices: 'NO_KEYS',
+        trial_duration: 1000
+      };
+
+      // Squares trial (Baked-in unique count)
+      var squares_trial = {
+        type: jsPsychCanvasKeyboardResponse,
+        data: {
+          squares_count: currentCount // This locks the current count integer into this specific trial object's data
+        },
+        stimulus: function(c) {
+          var ctx = c.getContext('2d');
+          ctx.clearRect(0, 0, c.width, c.height);
+          ctx.fillStyle = "black";
+      
+          var targetArea = 200;
+          var startX = (c.width - targetArea) / 2;
+          var startY = (c.height - targetArea) / 2;
+      
+          // FIX: Pull directly from the trial's local data block to prevent closure/scoping duplication errors
+          var trial_count = jsPsych.getCurrentTrial().data.squares_count;
+          var t = (trial_count * 1000) + 0x6D2B79F5;
+      
+          function seededRandom() {
+            t = Math.imul(t ^ (t >>> 15), t | 1);
+            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+          }
+
+          function getSeededInt(min, max) {
+            return Math.floor(seededRandom() * (max - min + 1)) + min;
+          }
+
+          function checkOverlap(newSquare, existingSquares) {
+            return existingSquares.some(function(sq) {
+              return !(newSquare.x + newSquare.size < sq.x ||
+                       newSquare.x > sq.x + sq.size ||
+                       newSquare.y + newSquare.size < sq.y ||
+                       newSquare.y > sq.y + sq.size);
+            });
+          }
+
+          var squares = [];
+          var maxAttempts = 1000;
+          var attempts = 0;
+          var edgeMargin = 20; 
+
+          while (squares.length < trial_count && attempts < maxAttempts) {
+            var size = getSeededInt(12, 16);
+            var x = getSeededInt(startX + edgeMargin, startX + targetArea - edgeMargin - size);
+            var y = getSeededInt(startY + edgeMargin, startY + targetArea - edgeMargin - size);
+        
+            var proposedSquare = { x: x, y: y, size: size };
+        
+            if (!checkOverlap(proposedSquare, squares)) {
+              squares.push(proposedSquare);
+            }
+            attempts++;
+          }
+
+          squares.forEach(function(sq) {
+            ctx.fillRect(sq.x, sq.y, sq.size, sq.size);
+          });
+        },
+        choices: "NO_KEYS",
+        trial_duration: 100,
+        canvas_size: [300, 300] 
+      };
+
+      // mask trial
+      var mask_trial = {
+        type: jsPsychImageKeyboardResponse,
+        stimulus: 'mask_2.png',
+        choices: 'NO_KEYS',
+        trial_duration: 400
+      };
+
+      // Define the question response template
+      var question_response_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function() {
+          // FIX: Pass the precise static value straight to the input template string
+          let correctValue = String(currentCount);
+
+          return `
+            <div style="font-size: 72px; color: #000000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+              <div>?</div>
+            
+              <input type="text" id="auto-input" autofocus autocomplete="off"
+                     data-correct="${correctValue}"
+                     style="width: 50px; font-size: 24px; text-align: center; padding: 5px; border: 2px solid #333; border-radius: 4px; margin-top: 60px;"
+                     oninput="
+                       let rt = performance.now() - window.trialStartTime;
+                       let val = this.value.trim();
+                 
+                       if (val.length === 1 && '12345678'.includes(val)) {
+                         this.disabled = true; 
+                         let currentTrial = jsPsych.getCurrentTrial();
+                         currentTrial.data.participant_response = val;
+                         currentTrial.data.rt = rt;
+
+                         // FIX: Evaluate using the attribute generated safely in the DOM layer
+                         currentTrial.data.correct = (val === this.getAttribute('data-correct'));
+                         
+                         currentTrial.data.test_part = 'practice_trial'; 
+                         jsPsych.finishTrial();
+                       }
+                     "
+              >
+            </div>
+          `;
+        },
+        choices: [], 
+        trial_duration: 2400, 
+        data: {
+          test_part: 'practice_trial',
+          squares_count: currentCount, // FIX: Avoid timeline variable errors
+          participant_response: null, 
+          rt: null,                   
+          correct: false              
+        },
+        on_load: function() {
+          window.trialStartTime = performance.now();
+          setTimeout(function() {
+            var element = document.getElementById('auto-input');
+            if (element) element.focus();
+          }, 10);
+        },
+        on_finish: function(data) {
+          data.test_part = 'practice_trial';
+          // FIX: Safeguard data check on completion
+          data.squares_count = currentCount;
+          
+          if (data.participant_response === null) {
+            data.participant_response = "timeout";
+            data.rt = 2400;
+            data.correct = false;
+          } else {
+            data.correct = (data.participant_response === String(currentCount));
+          }
+        }
+      };
+
+      // Invisible trial to prevent auto advance without pressing spacebar
+      var input_clearance_trial = {
+        type: jsPsychHtmlKeyboardResponse, stimulus: '', choices: "NO_KEYS", trial_duration: 150
+      };
+
+      // Define the spacebar prompt to begin next trial
+      var spacebar_prompt_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<div style="font-size: 24px; color: #000000; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">Press the spacebar to begin the next trial</div>',
+        choices: [' ']
+      };
+
+      // Define 200ms inter-trial pause
+      var inter_round_pause_trial = {
+        type: jsPsychHtmlKeyboardResponse, stimulus: '', choices: "NO_KEYS", trial_duration: 200
+      };
+
+      // Group the sequence components together as one locked round object
+      var single_round_procedure = {
+        timeline: [
+          fixation_trial, 
+          squares_trial, 
+          mask_trial, 
+          question_response_trial,
+          input_clearance_trial,
+          spacebar_prompt_trial,
+          inter_round_pause_trial
+        ]
+      };
+
+      // Push the independent round block into the pool array
+      all_rounds.push(single_round_procedure);
+    }
+
+    // ================================================================
+    // PIPELINE CONTROL BLOCK
+    // ================================================================
+
+    // Randomly pick EXACTLY 6 unique rounds out of the 8 available
+    var randomized_rounds = jsPsych.randomization.sampleWithoutReplacement(all_rounds, 6);
+
+    // Failure screen (plays only if they get 4+ incorrect)
+    var fail_feedback = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "<p style='font-family: sans-serif; font-size: 24px; text-align: center;'>You got 4 or more incorrect responses.</p><p style='font-family: sans-serif; font-size: 20px; text-align: center;'>Let's review the instructions and try the practice round again.<br><br>Press the spacebar to restart.</p>",
+      choices: [' ']
+    };
+
+    // Gatekeeper node: prevents the failure screen from flashing on a successful pass
+    var fail_feedback_conditional = {
+      timeline: [fail_feedback],
+      conditional_function: function() {
+        var all_practice_responses = jsPsych.data.get().filter({test_part: 'practice_trial'}).values();
+        if (all_practice_responses.length < 6) { return false; }
+        
+        var current_round_responses = all_practice_responses.slice(-6);
+        var incorrect_count = current_round_responses.filter(function(trial) {
+          return trial.correct === false;
+        }).length;
+        
+        console.log("Gatekeeper evaluation -> Errors in this run:", incorrect_count);
+        return incorrect_count >= 4; 
+      }
+    };
+
+    // Master Control Loop Wrapper
+    var practice_loop_wrapper = {
+      timeline: [...randomized_rounds, fail_feedback_conditional],
+      loop_function: function(data) {
+        var all_practice_responses = jsPsych.data.get().filter({test_part: 'practice_trial'}).values();
+        var current_round_responses = all_practice_responses.slice(-6);
+        
+        var incorrect_count = current_round_responses.filter(function(trial) {
+          return trial.correct === false;
+        }).length;
+        
+        var correct_count = current_round_responses.filter(function(trial) {
+          return trial.correct === true;
+        }).length;
+        
+        console.log("Loop evaluation -> Incorrect:", incorrect_count, " | Correct:", correct_count);
+        
+        if (incorrect_count >= 4) {
+          // Select 6 fresh random unique rounds if they fail, preventing repetition errors
+          var fresh_rounds = jsPsych.randomization.sampleWithoutReplacement(all_rounds, 6);
+          practice_loop_wrapper.timeline = [...fresh_rounds, fail_feedback_conditional];
+          return true;   
+        } else if (correct_count >= 3) {
+          return false;  
+        }
+        return false; 
+      }
+    };
+  
+  timeline.push(practice_loop_wrapper);
+
+  // 5. Define the Success/Pass feedback screen
+  var pass_feedback = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+      <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.6; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+        <h2 style="margin-bottom: 25px; font-size: 26px; color: #111111;">Practice Round Complete</h2>
+        <p style="margin-bottom: 35px;">
+          Congratulations! You have now successfully completed the <strong>6 practice trials</strong>.
+        </p>
+        <p style="font-size: 22px; color: #000000; margin-bottom: 10px;">
+          <strong>Click the "Next" button below to continue to the main task.</strong>
+        </p>
+      </div>`,
+    choices: "NO_KEYS",
+    on_start: function() {
+      var questionData = jsPsych.data.get().filterCustom(function(trial) {
+        return trial.participant_response !== undefined && trial.participant_response !== null;
+      });
+
+      var countsString = questionData.select('squares_count').values.join(',');
+      var responsesString = questionData.select('participant_response').values.join(',');
+      var rtsString = questionData.select('rt').values.join(',');
+      var scoresString = questionData.select('correct').values.join(',');
+
+      if (window.Qualtrics && Qualtrics.SurveyEngine) {
+        Qualtrics.SurveyEngine.setEmbeddedData('practice_target_counts', countsString);
+        Qualtrics.SurveyEngine.setEmbeddedData('practice_user_responses', responsesString);
+        Qualtrics.SurveyEngine.setEmbeddedData('practice_reaction_times', rtsString);
+        Qualtrics.SurveyEngine.setEmbeddedData('practice_accuracy_scores', scoresString);
+        Qualtrics.SurveyEngine.showNextButton();
+      } else {
+        console.log("--- LOCAL TESTING DATA LOG ---");
+        console.log("Target Counts:", countsString);
+        console.log("User Responses:", responsesString);
+        console.log("Reaction Times:", rtsString);
+        console.log("Accuracy Scores:", scoresString);
+        console.log("-------------------------------");
+      }
+    }
+  };
+   
+  timeline.push(pass_feedback);
+
+  // Run the experiment  
+  jsPsych.run(timeline);
+
+  </script>
+</html>
