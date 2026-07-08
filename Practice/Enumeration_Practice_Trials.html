@@ -46,8 +46,42 @@
   <script>
 
     // initialise jspsych
-    const jsPsych = initJsPsych();
-      var timeline = [];
+    const jsPsych = initJsPsych({
+        on_finish: function() {
+        // 1. Filter out only the trials marked as practice trials
+        var allPracticeTrials = jsPsych.data.get().filter({test_part: 'practice_trial'}).values();
+        
+        // 2. Grab only the last 6 trials (the ones from their successful final loop pass)
+        var finalPassingTrials = allPracticeTrials.slice(-6);
+
+        // 3. Extract your targeted metrics from just those 6 passing trials
+        var countsArray = [];
+        var responsesArray = [];
+        var rtsArray = [];
+        var scoresArray = [];
+
+        finalPassingTrials.forEach(function(trial) {
+            countsArray.push(trial.squares_count);
+            responsesArray.push(trial.participant_response);
+            rtsArray.push(Math.round(trial.rt)); // Rounded for clean string data
+            scoresArray.push(trial.correct ? 1 : 0); // Convert true/false to 1 or 0
+        });
+
+        // 4. Package the array sets into clean comma-separated strings
+        var messagePayload = {
+            source: 'jspsych-experiment',
+            counts: countsArray.join(','),
+            responses: responsesArray.join(','),
+            rts: rtsArray.join(','),
+            scores: scoresArray.join(',')
+        };
+
+        // 5. Broadcast the clean strings to the Qualtrics parent listener window
+        window.parent.postMessage(messagePayload, "*"); 
+    }
+});
+     
+    var timeline = [];
 
     // preload images for the mask
     const preload = {
@@ -365,31 +399,6 @@
         </p>
       </div>`,
     choices: "NO_KEYS",
-    on_start: function() {
-      var questionData = jsPsych.data.get().filterCustom(function(trial) {
-        return trial.participant_response !== undefined && trial.participant_response !== null;
-      });
-
-      var countsString = questionData.select('squares_count').values.join(',');
-      var responsesString = questionData.select('participant_response').values.join(',');
-      var rtsString = questionData.select('rt').values.join(',');
-      var scoresString = questionData.select('correct').values.join(',');
-
-      if (window.Qualtrics && Qualtrics.SurveyEngine) {
-        Qualtrics.SurveyEngine.setEmbeddedData('practice_target_counts', countsString);
-        Qualtrics.SurveyEngine.setEmbeddedData('practice_user_responses', responsesString);
-        Qualtrics.SurveyEngine.setEmbeddedData('practice_reaction_times', rtsString);
-        Qualtrics.SurveyEngine.setEmbeddedData('practice_accuracy_scores', scoresString);
-        Qualtrics.SurveyEngine.showNextButton();
-      } else {
-        console.log("--- LOCAL TESTING DATA LOG ---");
-        console.log("Target Counts:", countsString);
-        console.log("User Responses:", responsesString);
-        console.log("Reaction Times:", rtsString);
-        console.log("Accuracy Scores:", scoresString);
-        console.log("-------------------------------");
-      }
-    }
   };
    
   timeline.push(pass_feedback);
