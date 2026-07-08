@@ -377,13 +377,42 @@
           practice_loop_wrapper.timeline = [...fresh_rounds, fail_feedback_conditional];
           return true;   
         } else if (correct_count >= 3) {
-          return false;  
+          
+          // ================================================================
+          // PUSH DATA IMMEDIATELY UPON SUCCESSFUL PASS
+          // ================================================================
+          console.log("Success threshold met! Preparing Qualtrics payload...");
+          
+          var countsArray = [];
+          var responsesArray = [];
+          var rtsArray = [];
+          var scoresArray = [];
+
+          current_round_responses.forEach(function(trial) {
+              countsArray.push(trial.squares_count);
+              responsesArray.push(trial.participant_response);
+              rtsArray.push(Math.round(trial.rt));
+              scoresArray.push(trial.correct ? 1 : 0);
+          });
+
+          var messagePayload = {
+              source: 'jspsych-experiment',
+              counts: countsArray.join(','),
+              responses: responsesArray.join(','),
+              rts: rtsArray.join(','),
+              scores: scoresArray.join(',')
+          };
+
+          // Send data to Qualtrics right now
+          window.parent.postMessage(messagePayload, "*"); 
+          
+          return false; // Break out of the practice loop 
         }
         return false; 
       }
     };
   
-  timeline.push(practice_loop_wrapper);
+    timeline.push(practice_loop_wrapper);
 
   // 5. Define the Success/Pass feedback screen
   var pass_feedback = {
@@ -399,7 +428,8 @@
         </p>
       </div>`,
     choices: "NO_KEYS",
-  };
+  trial_duration: 1000 // Give it 1 second to display before the timeline steps forward
+  }; 
    
   timeline.push(pass_feedback);
 
