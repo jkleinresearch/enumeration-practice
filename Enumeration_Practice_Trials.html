@@ -428,7 +428,12 @@
         </p>
       </div>`,
     choices: "NO_KEYS",
-  }; 
+    on_load: function() {
+        // FORCE THE TIMELINE TO FREEZE HERE PERMANENTLY
+        // This overrides the automatic sequential engine so it cannot reach the blank end state
+        jsPsych.pauseTimeline();
+      }
+    };  
    
   timeline.push(pass_feedback);
 
