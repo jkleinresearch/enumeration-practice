@@ -48,13 +48,15 @@
     // initialise jspsych
     const jsPsych = initJsPsych({
         on_finish: function() {
-        // 1. Filter out only the trials marked as practice trials
-        var allPracticeTrials = jsPsych.data.get().filter({test_part: 'practice_trial'}).values();
+        // 1. Target the main experimnent trials
+        var allPart1Trials = jsPsych.data.get().filter({test_part: 'part1_trial'}).values();
         
-        // 2. Grab only the last 6 trials (the ones from their successful final loop pass)
-        var finalPassingTrials = allPracticeTrials.slice(-6);
+        // 2.  Filter specifically for data collection nodes that contain responses
+        var finalPassingTrials = allPart1Trials.filter(function(trial) {
+            return trial.participant_response !== undefined;
+        });
 
-        // 3. Extract your targeted metrics from just those 6 passing trials
+        // 3. Extract your targeted metrics from all 48 trials
         var countsArray = [];
         var responsesArray = [];
         var rtsArray = [];
