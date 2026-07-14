@@ -180,11 +180,14 @@
           }
 
           function checkOverlap(newSquare, existingSquares) {
+             // Adjust this number (in pixels) to set the minimum distance between squares
+            var buffer = 30; 
+
             return existingSquares.some(function(sq) {
-              return !(newSquare.x + newSquare.size < sq.x ||
-                       newSquare.x > sq.x + sq.size ||
-                       newSquare.y + newSquare.size < sq.y ||
-                       newSquare.y > sq.y + sq.size);
+              return !(newSquare.x + newSquare.size + buffer < sq.x ||
+                       newSquare.x > sq.x + sq.size + buffer ||
+                       newSquare.y + newSquare.size + buffer < sq.y ||
+                       newSquare.y > sq.y + sq.size + buffer);
             });
           }
 
