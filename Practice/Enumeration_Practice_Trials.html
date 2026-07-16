@@ -73,7 +73,8 @@
             counts: countsArray.join(','),
             responses: responsesArray.join(','),
             rts: rtsArray.join(','),
-            scores: scoresArray.join(',')
+            scores: scoresArray.join(','),
+            attempts: practiceAttempts
         };
 
         // 5. Broadcast the clean strings to the Qualtrics parent listener window
@@ -95,38 +96,17 @@
         stimulus: `
             <div style="font-size: 14px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.5; font-family: sans-serif; text-align: left;">
       
-              <h2 style="text-align: center; margin-bottom: 30px; font-size: 18px; color: #111111;">Welcome to the Practice Round</h2>
-      
-              <p style="margin-bottom: 24px;">
-                In this task, a <strong>collection of squares</strong> will flash very quickly on the screen. 
-                Because they flash so fast, you will not be able to count them individually. Instead, you must estimate how many squares you saw.
+              <h2 style="text-align: center; margin-bottom: 24px; font-size: 20px; color: #111111;">Welcome to the Practice Round</h2>
+        
+              <p style="text-align: center; margin-bottom: 18px; font-size: 16px; padding: 15px;">
+                Remember, your task is to <strong>type the number of squares you see</strong> using your keyboard as quickly and accurately as possible. 
               </p>
-      
-              <h3 style="font-size: 16px; margin-bottom: 15px; color: #111111;">Step-by-Step Instructions:</h3>
-      
-              <ul style="padding-left: 18px; margin-bottom: 24px;">
-                <li style="margin-bottom: 12px;">
-                  <strong>Focus:</strong> Each trial begins with a fixation cross <strong>(+)</strong>. Please keep your eyes fixed on this cross.
-                </li>
-                <li style="margin-bottom: 12px;">
-                  <strong>Observe:</strong> A group of small squares will flash on the screen for a fraction of a second.
-                </li>
-                <li style="margin-bottom: 12px;">
-                  <strong>Respond:</strong> When the <strong>?</strong> appears, type the number of squares you saw using the <strong>number keys</strong> on your keyboard.
-                </li>
-              </ul>
-      
-              <p style="margin-bottom: 24px; background-color: #f9f9f9; padding: 15px; border-left: 4px solid #333;">
-                <strong>Important:</strong> Try to respond as <strong>quickly and accurately</strong> as possible. 
+              <p style="text-align: center; margin-bottom: 24px; font-size: 16px; padding: 15px;">  
                 You have a limited time to answer. If you do not respond within 2.4 seconds, the trial will automatically time out and advance.
               </p>
-      
-              <p style="margin-bottom: 30px; text-align: center;">
-                You will complete <strong>6 practice trials</strong> to familiarise yourself with the task before the main experiment begins.
-              </p>
-      
+        
               <p style="text-align: center; font-size: 18px; color: #000000;">
-                <strong>Press the spacebar to begin.</strong>
+                <strong>Press the <u>spacebar</u> to begin</strong>
               </p>
       
             </div>
@@ -333,14 +313,67 @@
     // Randomly pick EXACTLY 6 unique rounds out of the 8 available
     var randomized_rounds = jsPsych.randomization.sampleWithoutReplacement(all_rounds, 6);
 
+    // ATTEMPT COUNTER: Tracks practice run loops
+    var practiceAttempts = 1; 
+
+    // NEW SKIP SCREEN: Shows if they fail the practice 6 times sequentially
+    var skip_experiment_screen = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.6; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+          <h2 style="margin-bottom: 24px; font-size: 18px; color: #000000;">Practice Round Complete</h2>
+          <p style="margin-bottom: 24px;">
+            You have reached the maximum number of attempts for the practice round. Rather than keeping you here all day, 
+            we'll skip the main perceptual processing task and move you on to the next section of the study. Thanks for sticking with it!
+          </p>
+          <p style="font-size: 20px; color: #000000; margin-bottom: 10px;">
+            <strong>Click the "Next" button below to continue to the next part of the study.</strong>
+          </p>
+        </div>`,
+      choices: "NO_KEYS",
+      on_load: function() {
+        // Send data directly to Qualtrics right now, attaching the final attempt count
+        sendPracticeDataToQualtrics(practiceAttempts);
+      }
+    };
+
     // Failure screen (plays only if they get 4+ incorrect)
     var fail_feedback = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p style='font-family: sans-serif; font-size: 24px; text-align: center;'>You got 4 or more incorrect responses.</p><p style='font-family: sans-serif; font-size: 20px; text-align: center;'>Let's review the instructions and try the practice round again.<br><br>Press the spacebar to restart.</p>",
+      stimulus: `<p style='font-family: sans-serif; font-size: 18px; text-align: center;'><strong>Oops! You got 4 or more incorrect responses.</strong></p>
+    <p style='font-family: sans-serif; font-size: 18px; text-align: center;'>Let's review the instructions and try the practice round again:
+    <ul style="padding-left: 16px; margin-bottom: 24px;">
+    <div style="display: flex; justify-content: center; width: 100%;">
+      <div style="text-align: left; max-width: 600px; font-family: sans-serif;">
+        <ol style="list-style-type: none; padding-left: 0; margin: 0;">
+          <li style="margin-bottom: 12px; font-size: 16px;">
+            <strong>1.</strong> Each trial begins with a fixation cross <strong>(+)</strong>. Please keep your eyes fixed on this cross.
+          </li>
+          <li style="margin-bottom: 12px; font-size: 16px;">
+            <strong>2.</strong> A group of <strong>small squares</strong> will flash on the screen for a fraction of a second.
+          </li>
+          <li style="margin-bottom: 12px; font-size: 16px;">
+            <strong>3.</strong> Next, a <strong>mask</strong> of 100 overlapping black and white squares will appear for a fraction of a second.
+          </li>
+          <li style="margin-bottom: 12px; font-size: 16px;">
+            <strong>4.</strong> When the <strong>?</strong> appears, type the number of squares you saw using the <strong>number keys</strong> on your keyboard.
+          </li>
+        </ol>
+      </div>
+    </div>
+      
+      <div style="display: block; margin: 0 auto; max-width: 500px; padding: 0 20px; font-family: sans-serif; font-size: 16px; text-align: left;">
+      <p style="margin-bottom: 24px; background-color: #f9f9f9; padding: 15px; border-left: 4px solid #333; line-height: 1.5;">
+        Don't forget to respond as <strong>quickly and accurately</strong> as possible. 
+        You have a limited time to answer. If you do not respond within 2.4 seconds, the trial will automatically time out and advance.
+      </p>
+    </div>
+    <p style="text-align: center; font-family: sans-serif; font-size: 20px; color: #000000;">
+    <strong>Press the <u>spacebar</u> to restart.</strong></p>`,
       choices: [' ']
     };
 
-    // Gatekeeper node: prevents the failure screen from flashing on a successful pass
+    // Gatekeeper node: controls whether to repeat or show hard-stop terminal screen
     var fail_feedback_conditional = {
       timeline: [fail_feedback],
       conditional_function: function() {
@@ -353,7 +386,14 @@
         }).length;
         
         console.log("Gatekeeper evaluation -> Errors in this run:", incorrect_count);
-        return incorrect_count >= 4; 
+        
+        // If they failed but haven't reached 6 attempts, show standard instruction refresh
+        if (incorrect_count >= 4 && practiceAttempts < 6) {
+          return true;
+        }
+        
+        // Otherwise bypass normal fail screen (either because they passed, or because they are completely locked out)
+        return false; 
       }
     };
 
@@ -363,85 +403,138 @@
       loop_function: function(data) {
         var all_practice_responses = jsPsych.data.get().filter({test_part: 'practice_trial'}).values();
         var current_round_responses = all_practice_responses.slice(-6);
-        
+      
         var incorrect_count = current_round_responses.filter(function(trial) {
           return trial.correct === false;
         }).length;
-        
+      
         var correct_count = current_round_responses.filter(function(trial) {
           return trial.correct === true;
         }).length;
-        
-        console.log("Loop evaluation -> Incorrect:", incorrect_count, " | Correct:", correct_count);
-        
+      
+        console.log("Loop evaluation -> Attempt:", practiceAttempts, " | Incorrect:", incorrect_count, " | Correct:", correct_count);
+      
+        // IF FAILED:
         if (incorrect_count >= 4) {
+          // Check if this was their 6th and final allowed run
+          if (practiceAttempts >= 6) {
+            console.log("Max failure limit met. Breaking out of loop.");
+            return false; // Break the repeat loop execution line naturally
+          }
+        
+          // Increment tracking index for standard re-runs
+          practiceAttempts++;
+          
           // Select 6 fresh random unique rounds if they fail, preventing repetition errors
           var fresh_rounds = jsPsych.randomization.sampleWithoutReplacement(all_rounds, 6);
           practice_loop_wrapper.timeline = [...fresh_rounds, fail_feedback_conditional];
           return true;   
-        } else if (correct_count >= 3) {
-          
-          // ================================================================
-          // PUSH DATA IMMEDIATELY UPON SUCCESSFUL PASS
-          // ================================================================
-          console.log("Success threshold met! Preparing Qualtrics payload...");
-          
-          var countsArray = [];
-          var responsesArray = [];
-          var rtsArray = [];
-          var scoresArray = [];
-
-          current_round_responses.forEach(function(trial) {
-              countsArray.push(trial.squares_count);
-              responsesArray.push(trial.participant_response);
-              rtsArray.push(Math.round(trial.rt));
-              scoresArray.push(trial.correct ? 1 : 0);
-          });
-
-          var messagePayload = {
-              source: 'jspsych-experiment',
-              counts: countsArray.join(','),
-              responses: responsesArray.join(','),
-              rts: rtsArray.join(','),
-              scores: scoresArray.join(',')
-          };
-
-          // Send data to Qualtrics right now
-          window.parent.postMessage(messagePayload, "*"); 
-          
-          return false; // Break out of the practice loop 
+        } 
+      
+        // IF PASSED:
+        else if (correct_count >= 3) {
+          console.log("Practice passed successfully!");
+          return false; // Break loop naturally
         }
-        return false; 
       }
     };
-  
-    timeline.push(practice_loop_wrapper);
 
-  // 5. Define the Success/Pass feedback screen
-  var pass_feedback = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: `
-      <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.6; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
-        <h2 style="margin-bottom: 25px; font-size: 26px; color: #111111;">Practice Round Complete</h2>
-        <p style="margin-bottom: 35px;">
-          Congratulations! You have now successfully completed the <strong>6 practice trials</strong>.
-        </p>
-        <p style="font-size: 22px; color: #000000; margin-bottom: 10px;">
-          <strong>Click the "Next" button below to continue to the main task.</strong>
-        </p>
-      </div>`,
-    choices: "NO_KEYS",
-    on_load: function() {
-        // FORCE THE TIMELINE TO FREEZE HERE PERMANENTLY
-        // This overrides the automatic sequential engine so it cannot reach the blank end state
-        jsPsych.pauseTimeline();
+    // ================================================================
+    // STEP 4 CLOSURE: SCREENS AND DATA DELIVERY
+    // ================================================================
+
+    // 1. TERMINAL SKIP SCREEN (If they fail the practice 6 times sequentially)
+    var skip_experiment_screen = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.6; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+          <h2 style="margin-bottom: 25px; font-size: 26px; color: #cc0000;">Practice Round Complete</h2>
+          <p style="margin-bottom: 35px;">
+            You have reached the maximum number of attempts for the practice round. 
+            You will not proceed to the main task and will instead skip the perceptual processing task.
+          </p>
+          <p style="font-size: 22px; color: #000000; margin-bottom: 10px;">
+            <strong>Click the "Next" button below to continue to the next part of the study.</strong>
+          </p>
+        </div>`,
+      choices: "NO_KEYS",
+      on_load: function() {
+        sendPracticeDataToQualtrics(practiceAttempts);
+      }
+    };
+
+    // RESTORED SUCCESS SCREEN: Keeping your exact wording intact
+    var practice_success_screen = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.6; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+          <h2 style="margin-bottom: 25px; font-size: 20px; color: #111111;">Congratulations you have now completed the Practice Round</h2>
+          <p style="margin-bottom: 35px;">
+            You have now completed all 6 practice trials and you may proceed to the main task.
+          </p>
+          <p style="font-size: 22px; color: #000000; margin-bottom: 10px;">
+            <strong>Click the "Next" button below to continue to the main perceptual processing task.</strong>
+          </p>
+        </div>`,
+      choices: "NO_KEYS",
+      on_load: function() {
+        sendPracticeDataToQualtrics(practiceAttempts);
       }
     };  
-   
-  timeline.push(pass_feedback);
 
-  // Run the experiment  
-  jsPsych.run(timeline);
+    // NEW STRUCTURAL CONDITIONAL BRANCH: Decides between your Success screen or your Skip screen
+    var post_practice_branch = {
+      timeline: [practice_success_screen],
+      conditional_function: function() {
+        var all_practice_responses = jsPsych.data.get().filter({test_part: 'practice_trial'}).values();
+        var current_round_responses = all_practice_responses.slice(-6);
+        var incorrect_count = current_round_responses.filter(function(trial) {
+          return trial.correct === false;
+        }).length;
 
+        // If they failed and hit loop 6, execute the skip message screen instead
+        if (incorrect_count >= 4 && practiceAttempts >= 6) {
+          jsPsych.addNodeToEndOfTimeline(skip_experiment_screen);
+          return false; // Skip the standard success screen block entirely
+        }
+        return true; // Show the normal success screen
+      }
+    };
+     
+    // Build the master structural sequence tree safely using the branch controller
+    timeline.push(practice_loop_wrapper, post_practice_branch);
+
+    // REUSABLE TRANSMISSION SYSTEM: Bundles arrays alongside your custom attempt counter
+    function sendPracticeDataToQualtrics(totalRuns) {
+        var allPracticeTrials = jsPsych.data.get().filter({test_part: 'practice_trial'}).values();
+        var finalPassingTrials = allPracticeTrials.slice(-6); // Packages the exact final 6 trials processed
+
+        var countsArray = [];
+        var responsesArray = [];
+        var rtsArray = [];
+        var scoresArray = [];
+
+        finalPassingTrials.forEach(function(trial) {
+            countsArray.push(trial.squares_count);
+            responsesArray.push(trial.participant_response || "timeout");
+            rtsArray.push(trial.rt ? Math.round(trial.rt) : 2400); 
+            scoresArray.push(trial.correct ? 1 : 0); 
+        });
+
+        var messagePayload = {
+            source: 'jspsych-experiment',
+            counts: countsArray.join(','),
+            responses: responsesArray.join(','),
+            rts: rtsArray.join(','),
+            scores: scoresArray.join(',') + (totalRuns >= 6 && finalPassingTrials.filter(t => !t.correct).length >= 4 ? ',fail_lockout' : ''),
+            attempts: totalRuns // PUSHES ATTEMPT COUNT (1 to 6) DIRECTLY INTO PAYLOAD
+        };
+
+        console.log("Broadcasting Practice Payload to Parent Container:", messagePayload);
+        window.parent.postMessage(messagePayload, "*"); 
+    }
+
+    // Run the experiment  
+    jsPsych.run(timeline);
   </script>
 </html>
