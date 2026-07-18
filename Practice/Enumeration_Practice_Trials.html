@@ -322,7 +322,7 @@
       stimulus: `
         <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.5; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
           <h2 style="margin-bottom: 24px; font-size: 18px; color: #000000;">Practice Round Complete</h2>
-          <p style="margin-bottom: 24px;">
+          <p style="margin-bottom: 24px; font-size: 16px;">
             You have reached the maximum number of attempts for the practice round. Rather than keeping you here all day, 
             we'll skip the main perceptual processing task and move you on to the next section of the study. Thanks for sticking with it!
           </p>
@@ -444,8 +444,8 @@
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
         <div style="font-size: 18px; color: #000000; max-width: 700px; margin: 0 auto; line-height: 1.5; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
-          <h2 style="margin-bottom: 18px; font-size: 16px; color: #000000;">Practice Round Complete</h2>
-          <p style="margin-bottom: 18px;">
+          <h2 style="margin-bottom: 20px; font-size: 18px; color: #000000;">Practice Round Complete</h2>
+          <p style="margin-bottom: 18px; font-size: 16px;">
             You have reached the maximum number of attempts for the practice round. Rather than keeping you here all day, 
             we'll skip the main perceptual processing task and move you on to the next section of the study. Thanks for sticking with it!
           </p>
@@ -490,9 +490,16 @@
 
         // If they failed and hit loop 6, execute the skip message screen instead
         if (incorrect_count >= 4 && practiceAttempts >= 6) {
+          // CRITICAL ADDITION: Triggers data transfer, sends status: "fail" to Qualtrics
+          sendPracticeDataToQualtrics(practiceAttempts);
           jsPsych.addNodeToEndOfTimeline(skip_experiment_screen);
           return false; // Skip the standard success screen block entirely
         }
+
+        // CRITICAL ADDITION: Triggers data transfer, sends status: "pass" to Qualtrics
+        // This catches everyone who passed early (attempts 1-5) AND those who passed on attempt 6!
+        sendPracticeDataToQualtrics(practiceAttempts); 
+        
         return true; // Show the normal success screen
       }
     };
