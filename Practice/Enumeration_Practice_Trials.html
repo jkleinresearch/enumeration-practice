@@ -517,13 +517,21 @@
             scoresArray.push(trial.correct ? 1 : 0); 
         });
 
+        // 1. Calculate the failure condition explicitly
+        var incorrectCount = finalPassingTrials.filter(t => !t.correct).length;
+        var hasFailedLockout = (totalRuns >= 6 && incorrectCount >= 4);
+
         var messagePayload = {
             source: 'jspsych-experiment',
             counts: countsArray.join(','),
             responses: responsesArray.join(','),
             rts: rtsArray.join(','),
-            scores: scoresArray.join(',') + (totalRuns >= 6 && finalPassingTrials.filter(t => !t.correct).length >= 4 ? ',fail_lockout' : ''),
-            attempts: totalRuns // PUSHES ATTEMPT COUNT (1 to 6) DIRECTLY INTO PAYLOAD
+            // Simplifies this string by using our clean variable
+            scores: scoresArray.join(',') + (hasFailedLockout ? ',fail_lockout' : ''),
+            attempts: totalRuns, // PUSHES ATTEMPT COUNT (1 to 6) DIRECTLY INTO PAYLOAD
+        
+            // 2. ADD THIS PROPERTY: Tells Qualtrics exactly when to flag a total lockout
+            status: hasFailedLockout ? "fail" : "pass" 
         };
 
         console.log("Broadcasting Practice Payload to Parent Container:", messagePayload);
