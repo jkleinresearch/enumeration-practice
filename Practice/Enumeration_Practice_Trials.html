@@ -280,7 +280,7 @@
       // Define the spacebar prompt to begin next trial
       var spacebar_prompt_trial = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<div style="font-size: 24px; color: #000000; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">Press the spacebar to begin the next trial</div>',
+        stimulus: '<div style="font-size: 20px; color: #000000; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">Press the <u>spacebar</u> to begin the next trial</div>',
         choices: [' ']
       };
 
@@ -322,11 +322,11 @@
       stimulus: `
         <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.5; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
           <h2 style="margin-bottom: 24px; font-size: 18px; color: #000000;">Practice Round Complete</h2>
-          <p style="margin-bottom: 24px; font-size: 16px;">
+          <p style="margin-bottom: 18px; font-size: 16px;">
             You have reached the maximum number of attempts for the practice round. Rather than keeping you here all day, 
             we'll skip the main perceptual processing task and move you on to the next section of the study. Thanks for sticking with it!
           </p>
-          <p style="font-size: 18px; color: #000000; margin-bottom: 10px;">
+          <p style="font-size: 18px; color: #000000; margin-bottom: 6px;">
             <strong>Click the "Next" button below to continue to the next part of the study.</strong>
           </p>
         </div>`,
@@ -444,12 +444,12 @@
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
         <div style="font-size: 18px; color: #000000; max-width: 700px; margin: 0 auto; line-height: 1.5; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
-          <h2 style="margin-bottom: 20px; font-size: 18px; color: #000000;">Practice Round Complete</h2>
+          <h2 style="margin-bottom: 24px; font-size: 18px; color: #000000;">Practice Round Complete</h2>
           <p style="margin-bottom: 18px; font-size: 16px;">
             You have reached the maximum number of attempts for the practice round. Rather than keeping you here all day, 
             we'll skip the main perceptual processing task and move you on to the next section of the study. Thanks for sticking with it!
           </p>
-          <p style="font-size: 18px; color: #000000; margin-bottom: 10px;">
+          <p style="font-size: 18px; color: #000000; margin-bottom: 6px;">
             <strong>Click the "Next" button below to continue to the next part of the study.</strong>
           </p>
         </div>`,
@@ -464,12 +464,12 @@
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
         <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.5; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
-          <h2 style="margin-bottom: 25px; font-size: 20px; color: #111111;">Congratulations you have now completed the Practice Round</h2>
-          <p style="margin-bottom: 35px; font-size: 16px;">
+          <h2 style="margin-bottom: 24px; font-size: 20px; color: #111111;">Congratulations you have now completed the Practice Round</h2>
+          <p style="margin-bottom: 18px; font-size: 16px;">
             You have now completed all 6 practice trials and you may proceed to the main task.
           </p>
-          <p style="font-size: 18px; color: #000000; margin-bottom: 10px;">
-            <strong>Click the "Next" button below to continue to the main perceptual processing task.</strong>
+          <p style="font-size: 18px; color: #000000; margin-bottom: 6px;">
+            <strong>Click the "Next" button below to continue.</strong>
           </p>
         </div>`,
       choices: "NO_KEYS",

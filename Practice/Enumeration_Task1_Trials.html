@@ -95,14 +95,14 @@
     const welcome_instructions = {
       type: jsPsychHtmlKeyboardResponse,
         stimulus: `
-            <div style="color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.5; font-family: sans-serif">
+            <div style="color: #000000; max-width: 700px; margin: 0 auto; line-height: 1.5; font-family: sans-serif">
       
               <h2 style="text-align: center; margin-bottom: 24px; font-size: 20px; color: #111111;">Welcome to Part 1 of the Main Task</h2>
       
               <p style="margin-bottom: 18px; font-size: 16px; padding: 15 px; text-align: center">
                 As in the practice rounds, your task is to <strong>type the number of squares you see</strong> using your keyboard as quickly and accurately as possible. 
               </p>
-              <p style="text-align: center; margin-bottom: 24px; font-size: 16px; padding: 15px; text-align: center">  
+              <p style="text-align: center; margin-bottom: 18px; font-size: 16px; padding: 15px; text-align: center">  
                 You have a limited time to answer. If you do not respond within 2.4 seconds, the trial will automatically time out and advance.
               </p>
        
@@ -314,7 +314,7 @@
       // Spacebar step progression screen
       var spacebar_prompt_trial = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<div style="font-size: 24px; color: #000000; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">Press the spacebar to begin the next trial</div>',
+        stimulus: '<div style="font-size: 20px; color: #000000; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">Press the <u>spacebar</u> to begin the next trial</div>',
         choices: [' ']
       };
 
@@ -339,12 +339,12 @@
     var part1_complete_screen = {
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
-        <div style="font-size: 18px; color: #000000; max-width: 800px; margin: 0 auto; line-height: 1.6; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
-          <h2 style="margin-bottom: 25px; font-size: 26px; color: #111111;">Congratulations you are half way there!</h2>
-          <p style="margin-bottom: 35px;">
+        <div style="font-size: 16px; color: #000000; max-width: 700px; margin: 0 auto; line-height: 1.6; font-family: sans-serif; text-align: center; height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+          <h2 style="margin-bottom: 24px; font-size: 20px; color: #111111;">Congratulations you are half way there!</h2>
+          <p style="margin-bottom: 18px;">
             You have now successfully completed Part 1 of the Perceptual Processing Task.
           </p>
-          <p style="font-size: 22px; color: #000000; margin-bottom: 10px;">
+          <p style="font-size: 18px; color: #000000; margin-bottom: 6px;">
             <strong>Click the "Next" button below to continue to Part 2.</strong>
           </p>
         </div>`,
