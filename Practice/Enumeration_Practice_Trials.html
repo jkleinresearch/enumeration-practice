@@ -340,19 +340,19 @@
     // Failure screen (plays only if they get 4+ incorrect)
     var fail_feedback = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<p style='font-family: sans-serif; font-size: 18px; text-align: center;'><strong>Oops! You got 4 or more incorrect responses.</strong></p>
-    <p style='font-family: sans-serif; font-size: 18px; text-align: center;'>Let's review the instructions and try the practice round again:
-    <ul style="padding-left: 16px; margin-bottom: 24px;">
+      stimulus: `<p style='font-family: sans-serif; font-size: 18px; text-align: center; max-width: 650px; '><strong>You got 4 or more incorrect responses. Let's review the instructions and try the practice round again:</strong></p>
+    <p style='font-family: sans-serif; font-size: 18px; text-align: center;'>
+    <ul style="padding-left: 16px; margin-bottom: 18px;">
     <div style="display: flex; justify-content: center; width: 100%;">
-      <div style="text-align: left; max-width: 600px; font-family: sans-serif;">
+      <div style="text-align: left; max-width: 650px; font-family: sans-serif;">
         <ol style="list-style-type: none; padding-left: 0; margin: 0;">
-          <li style="margin-bottom: 12px; font-size: 16px;">
+          <li style="margin-bottom: 6px; font-size: 16px;">
             <strong>1.</strong> Each trial begins with a fixation cross <strong>(+)</strong>. Please keep your eyes fixed on this cross.
           </li>
-          <li style="margin-bottom: 12px; font-size: 16px;">
+          <li style="margin-bottom: 6px; font-size: 16px;">
             <strong>2.</strong> A group of <strong>small squares</strong> will flash on the screen for a fraction of a second.
           </li>
-          <li style="margin-bottom: 12px; font-size: 16px;">
+          <li style="margin-bottom: 6px; font-size: 16px;">
             <strong>3.</strong> Next, a <strong>mask</strong> of 100 overlapping black and white squares will appear for a fraction of a second.
           </li>
           <li style="margin-bottom: 12px; font-size: 16px;">
@@ -362,10 +362,9 @@
       </div>
     </div>
       
-      <div style="display: block; margin: 0 auto; max-width: 500px; padding: 0 20px; font-family: sans-serif; font-size: 16px; text-align: left;">
-      <p style="margin-bottom: 24px; background-color: #f9f9f9; padding: 15px; border-left: 4px solid #333; line-height: 1.5;">
-        Don't forget to respond as <strong>quickly and accurately</strong> as possible. 
-        You have a limited time to answer. If you do not respond within 2.4 seconds, the trial will automatically time out and advance.
+      <div style="display: block; margin: 0 auto; max-width: 550px; padding: 0 20px; font-family: sans-serif; font-size: 16px; text-align: left;">
+      <p style="margin-bottom: 24px; background-color: #f9f9f9; padding: 15px; border-left: 3px solid #333; border-right: 3px solid #333; line-height: 1.5;">
+        Remember the aim is to respond as <strong>quickly and accurately</strong> as possible. If you do not respond within 2.4 seconds, the trial will automatically time out and advance.
       </p>
     </div>
     <p style="text-align: center; font-family: sans-serif; font-size: 20px; color: #000000;">
